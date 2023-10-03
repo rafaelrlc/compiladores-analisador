@@ -16,7 +16,9 @@ regex_tokens = {
     'TEMPO': r'15_min|20_min|1_hora|1_dia|2_dias|sem_limite',
     'ESPACO': r'\s+',
     'VEZES': r'1|2|3|4|5',
-    'PV': r';'
+    'PV': r';',
+    'COMMENT': r'#(.*)#',
+    'QUEBRA': r'\n'
 }
 
 temporizador = {
@@ -127,21 +129,24 @@ def programa_sol(tokens, lookahead, no):
     else:
         raise Exception(f'Erro de sintaxe: {tokens[lookahead]}')
 
-
 def parser(tokens):
-    lookahead = 0
+    # lookahead = 0
     no = NoComando(-1, -1, -1)
 
-    # browser = -1      # Não sei se vai precisar ser usado
-    # link = -1
-    # tempo = -1
+    for lookahead, (nome, lexema) in enumerate(tokens):
+        print(nome)
+        if nome == 'COMMENT' or nome == 'ESPACO' or nome == 'QUEBRA':
+            continue
+        elif nome == 'LOOP':
+            no = NoComando(-1, -1, -1)
+            arvore = programa_sol(tokens, lookahead, no)
+            return arvore
+        else:
+            print('Sintaxe inválida\n')
+            raise Exception(f'Erro de sintaxe: {tokens[lookahead]}')
 
-    if reconhece(tokens, lookahead, 'LOOP') and reconhece(tokens, lookahead + 1, 'ESPACO'):
-        arvore = programa_sol(tokens, lookahead, no)
-        return arvore
+    raise Exception("Erro de sintaxe")
 
-    print('\nSintaxe inválida\n')
-    return None
 
 
 def executar(arvore):
